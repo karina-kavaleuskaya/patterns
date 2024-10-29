@@ -1,12 +1,16 @@
 class Car:
     _instance = None
 
+    def __init__(self):
+        self.engine = 'V8'
+        self.transmission = 'Automatic'
+
+
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
             cls._instance = super(Car, cls).__new__(cls)
-            cls._instance.engine = "V8"
-            cls._instance.transmission = "Automatic"
         return cls._instance
+
 
     def start(self):
         return "Car is ready to go!"

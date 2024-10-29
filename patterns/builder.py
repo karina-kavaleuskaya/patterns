@@ -6,7 +6,7 @@ class Car:
         self.data: str = ''
 
     def about_car(self) -> str:
-        return  self.data
+        return self.data
 
     def append_data(self, string: str):
         self.data += string
@@ -71,20 +71,20 @@ class TruckCarFactory(Factory):
         return self.__car
 
 
-class Director:
+class Builder:
     def __init__(self, factory: Factory):
         self.__factory = factory
 
     def set_factory(self, factory: Factory):
         self.__factory = factory
 
-    def create_without_engine(self) -> Car:
+    def build_without_engine(self) -> Car:
         self.__factory.create_transmission()
         self.__factory.create_gears()
         self.__factory.create_brake_sys()
         return self.__factory.get_car()
 
-    def create_ready_car(self) -> Car:
+    def build_ready_car(self) -> Car:
         self.__factory.crete_engine()
         self.__factory.create_transmission()
         self.__factory.create_gears()
@@ -95,13 +95,13 @@ class Director:
 if __name__ == "__main__":
     sportcar_factory: Factory = SportCarFactory()
 
-    director = Director(sportcar_factory)
+    builder = Builder(sportcar_factory)
 
-    sportcar: Car = director.create_ready_car()
+    sportcar: Car = builder.build_ready_car()
     print(sportcar.about_car())
 
     truck_factory: Factory = TruckCarFactory()
-    director.set_factory(truck_factory)
+    builder.set_factory(truck_factory)
 
-    truck:  Car = director.create_without_engine()
+    truck:  Car = builder.build_without_engine()
     print(truck.about_car())
