@@ -1,84 +1,137 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 
 
-class Engine(metaclass=ABCMeta):
+# Абстрактные классы для автомобилей и их частей
+class Engine(ABC):
     @abstractmethod
-    def description(self):
+    def get_type(self):
         pass
 
 
-class SportCarEngine(Engine):
-    def description(self):
-        print('Engine for sport car')
-
-
-class TruckEngine(Engine):
-    def description(self):
-        print('Engine for truck')
-
-
-class Car(metaclass=ABCMeta):
+class Wheel(ABC):
     @abstractmethod
-    def initialize(self, engine: Engine):
+    def get_type(self):
+        pass
+
+class Car(ABC):
+    @abstractmethod
+    def get_description(self):
         pass
 
 
-class SportCar(Car):
-    def initialize(self, engine: Engine):
-        engine.description()
-        return 'Sport car is ready'
+# Конкретные классы для двигателей
+class V8Engine(Engine):
+    def get_type(self):
+        return "V8 Engine"
 
 
-class TruckCar(Car):
-    def initialize(self, engine: Engine):
-        engine.description()
-        return 'Truck is ready'
+class V6Engine(Engine):
+    def get_type(self):
+        return "V6 Engine"
 
 
-class EngineFactory(metaclass=ABCMeta):
+# Конкретные классы для колес
+class SportsWheel(Wheel):
+    def get_type(self):
+        return "sport weels"
+
+
+class RegularWheel(Wheel):
+    def get_type(self):
+        return "regular wheels"
+
+
+# Конкретные классы для автомобилей
+class SportsCar(Car):
+    def __init__(self, engine: Engine, wheel: Wheel):
+        self.engine = engine
+        self.wheel = wheel
+
+    def get_description(self):
+        return f"Sports Car with {self.engine.get_type()} and {self.wheel.get_type()}."
+
+
+class RegularCar(Car):
+    def __init__(self, engine: Engine, wheel: Wheel):
+        self.engine = engine
+        self.wheel = wheel
+
+    def get_description(self):
+        return f"Regular Car with {self.engine.get_type()} and {self.wheel.get_type()} wheels."
+
+
+# Абстрактные фабрики для двигателя
+class EngineFactory(ABC):
     @abstractmethod
-    def create_engine(self) -> Engine:
+    def create_v6_engine(self) -> Engine:
+        pass
+
+    @abstractmethod
+    def create_v8_engine(self) -> Engine:
         pass
 
 
-class SportCarEngineFactory(EngineFactory):
-    def create_engine(self) -> Engine:
-        return SportCarEngine()
-
-
-class TruckEngineFactory(EngineFactory):
-    def create_engine(self) -> Engine:
-        return TruckEngine()
-
-
-class CarFactory(metaclass=ABCMeta):
+# Абстрактные фабрики для колес
+class WheelFactory(ABC):
     @abstractmethod
-    def create_car(self) -> Car:
+    def create_sports_wheel(self) -> Wheel:
+        pass
+
+    @abstractmethod
+    def create_regular_wheel(self) -> Wheel:
         pass
 
 
-class SportCarFactory(CarFactory):
-    def create_car(self) -> Car:
-        return SportCar()
+# Конкретные фабрики для двигателей
+class ConcreteEngineFactory(EngineFactory):
+    def create_v6_engine(self) -> Engine:
+        return V6Engine()
+
+    def create_v8_engine(self) -> Engine:
+        return V8Engine()
 
 
-class TruckFactory(CarFactory):
-    def create_car(self) -> Car:
-        return TruckCar()
+# Конкретные фабрики для колес
+class ConcreteWheelFactory(WheelFactory):
+    def create_sports_wheel(self) -> Wheel:
+        return SportsWheel()
 
+    def create_regular_wheel(self) -> Wheel:
+        return RegularWheel()
+
+
+# Фабрики автомобилей
+class CarFactory(ABC):
+    @abstractmethod
+    def create_car(self, engine_factory: EngineFactory, wheel_factory: WheelFactory) -> Car:
+        pass
+
+
+class SportsCarFactory(CarFactory):
+    def create_car(self, engine_factory: EngineFactory, wheel_factory: WheelFactory) -> Car:
+        engine = engine_factory.create_v8_engine()
+        wheel = wheel_factory.create_sports_wheel()
+        return SportsCar(engine, wheel)
+
+
+class RegularCarFactory(CarFactory):
+    def create_car(self, engine_factory: EngineFactory, wheel_factory: WheelFactory) -> Car:
+        engine = engine_factory.create_v6_engine()
+        wheel = wheel_factory.create_regular_wheel()
+        return RegularCar(engine, wheel)
 
 
 if __name__ == "__main__":
 
-    sport_factory = SportCarFactory()
-    sport_engine_factory = SportCarEngineFactory()
-    sport_car = sport_factory.create_car()
-    sport_engine = sport_engine_factory.create_engine()
-    print(sport_car.initialize(sport_engine))  # Engine for sport car; Sport car is ready
+    engine_factory = ConcreteEngineFactory()
+    wheel_factory = ConcreteWheelFactory()
 
 
-    truck_factory = TruckFactory()
-    truck_engine_factory = TruckEngineFactory()
-    truck_car = truck_factory.create_car()
-    truck_engine = truck_engine_factory.create_engine()
-    print(truck_car.initialize(truck_engine))  # Engine for truck; Truck is ready
+    sports_factory = SportsCarFactory()
+    sports_car = sports_factory.create_car(engine_factory, wheel_factory)
+    print(sports_car.get_description())
+
+
+    regular_factory = RegularCarFactory()
+    regular_car = regular_factory.create_car(engine_factory, wheel_factory)
+    print(regular_car.get_description())

@@ -1,107 +1,157 @@
-from abc import ABCMeta
+from abc import ABC, abstractmethod
+from enum import Enum
 
 
 class Car:
     def __init__(self):
-        self.data: str = ''
+        self.components = []
+
+    def add_component(self, component: str):
+        self.components.append(component)
 
     def about_car(self) -> str:
-        return self.data
-
-    def append_data(self, string: str):
-        self.data += string
+        return "Car components:\n" + "\n".join(self.components)
 
 
-class Factory(metaclass=ABCMeta):
-    def crete_engine(self):
+# Enum для типов двигателей
+class EngineType(Enum):
+    SPORT = "sport"
+    REGULAR = "regular"
+    TRUCK = "truck"
+
+
+# Enum для типов корпусов
+class BodyType(Enum):
+    SPORT = "sport"
+    REGULAR = "regular"
+    TRUCK = "truck"
+
+
+# Абстрактные классы для компонентов
+class Engine(ABC):
+    @abstractmethod
+    def get_description(self) -> str:
         pass
 
-    def create_transmission(self):
+
+class Body(ABC):
+    @abstractmethod
+    def get_description(self) -> str:
         pass
 
-    def create_gears(self):
+
+# Конкретные классы для двигателей
+class SportEngine(Engine):
+    def get_description(self) -> str:
+        return "Sport Engine"
+
+
+class RegularEngine(Engine):
+    def get_description(self) -> str:
+        return "Regular Engine"
+
+
+class TruckEngine(Engine):
+    def get_description(self) -> str:
+        return "Truck Engine"
+
+
+# Конкретные классы для корпусов
+class SportBody(Body):
+    def get_description(self) -> str:
+        return "Sport Body"
+
+
+class RegularBody(Body):
+    def get_description(self) -> str:
+        return "Regular Body"
+
+
+class TruckBody(Body):
+    def get_description(self) -> str:
+        return "Truck Body"
+
+
+# Заводы для компонентов
+class EngineFactory(ABC):
+    @abstractmethod
+    def create_engine(self, engine_type: EngineType) -> Engine:
         pass
 
-    def create_brake_sys(self):
+
+class BodyFactory(ABC):
+    @abstractmethod
+    def create_body(self, body_type: BodyType) -> Body:
         pass
+
+
+# Конкретные заводы для двигателей
+class ConcreteEngineFactory(EngineFactory):
+    def create_engine(self, engine_type: EngineType) -> Engine:
+        if engine_type == EngineType.SPORT:
+            return SportEngine()
+        elif engine_type == EngineType.REGULAR:
+            return RegularEngine()
+        elif engine_type == EngineType.TRUCK:
+            return TruckEngine()
+        else:
+            raise ValueError("Unknown engine type")
+
+
+# Конкретные заводы для корпусов
+class ConcreteBodyFactory(BodyFactory):
+    def create_body(self, body_type: BodyType) -> Body:
+        if body_type == BodyType.SPORT:
+            return SportBody()
+        elif body_type == BodyType.REGULAR:
+            return RegularBody()
+        elif body_type == BodyType.TRUCK:
+            return TruckBody()
+        else:
+            raise ValueError("Unknown body type")
+
+
+# Строитель
+class CarBuilder:
+    def __init__(self, engine_factory: EngineFactory, body_factory: BodyFactory):
+        self.engine_factory = engine_factory
+        self.body_factory = body_factory
+        self.car = Car()
+
+    def build_car(self, engine_type: EngineType, body_type: BodyType):
+        engine = self.engine_factory.create_engine(engine_type)
+        body = self.body_factory.create_body(body_type)
+        self.car.add_component(engine.get_description())
+        self.car.add_component(body.get_description())
 
     def get_car(self) -> Car:
-        pass
-
-
-class SportCarFactory(Factory):
-
-    def __init__(self):
-        self.__car = Car()
-
-    def crete_engine(self):
-        self.__car.append_data('Engine for sport car is ready')
-
-    def create_transmission(self):
-        self.__car.append_data('Transmission for sport car is ready')
-
-    def create_gears(self):
-        self.__car.append_data('Gears for sport car is ready')
-
-    def create_brake_sys(self):
-        self.__car.append_data('Brake system for sport car is ready')
-
-    def get_car(self) -> Car:
-        return self.__car
-
-
-class TruckCarFactory(Factory):
-
-    def __init__(self):
-        self.__car = Car()
-
-    def crete_engine(self):
-        self.__car.append_data('Engine for truck is ready\n',)
-
-    def create_transmission(self):
-        self.__car.append_data('Transmission for truck is ready\n')
-
-    def create_gears(self):
-        self.__car.append_data('Gears for truck is ready\n')
-
-    def create_brake_sys(self):
-        self.__car.append_data('Brake system for truck is ready\n')
-
-    def get_car(self) -> Car:
-        return self.__car
-
-
-class Builder:
-    def __init__(self, factory: Factory):
-        self.__factory = factory
-
-    def set_factory(self, factory: Factory):
-        self.__factory = factory
-
-    def build_without_engine(self) -> Car:
-        self.__factory.create_transmission()
-        self.__factory.create_gears()
-        self.__factory.create_brake_sys()
-        return self.__factory.get_car()
-
-    def build_ready_car(self) -> Car:
-        self.__factory.crete_engine()
-        self.__factory.create_transmission()
-        self.__factory.create_gears()
-        self.__factory.create_brake_sys()
-        return self.__factory.get_car()
+        return self.car
 
 
 if __name__ == "__main__":
-    sportcar_factory: Factory = SportCarFactory()
+    # Создание заводов
+    engine_factory = ConcreteEngineFactory()
+    body_factory = ConcreteBodyFactory()
 
-    builder = Builder(sportcar_factory)
+    # Создание спортивного автомобиля
+    sport_car_builder = CarBuilder(engine_factory, body_factory)
+    sport_car_builder.build_car(engine_type=EngineType.SPORT, body_type=BodyType.SPORT)
+    sport_car = sport_car_builder.get_car()
+    print("Sport Car:\n", sport_car.about_car())
 
-    sportcar: Car = builder.build_ready_car()
-    print(sportcar.about_car())
+    print('*' * 40)
 
-    truck_factory: Factory = TruckCarFactory()
-    builder.set_factory(truck_factory)
+    # Создание обычного автомобиля
+    regular_car_builder = CarBuilder(engine_factory, body_factory)
+    regular_car_builder.build_car(engine_type=EngineType.REGULAR, body_type=BodyType.REGULAR)
+    regular_car = regular_car_builder.get_car()
+    print("Regular Car:\n", regular_car.about_car())
 
-    truck:  Car = builder.build_without_engine()
-    print(truck.about_car())
+    print('*' * 40)
+
+    # Создание грузовика
+    truck_car_builder = CarBuilder(engine_factory, body_factory)
+    truck_car_builder.build_car(engine_type=EngineType.TRUCK, body_type=BodyType.TRUCK)
+    truck_car = truck_car_builder.get_car()
+    print("Truck Car:\n", truck_car.about_car())
+
