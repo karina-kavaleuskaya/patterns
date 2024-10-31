@@ -1,11 +1,26 @@
 from abc import ABC, abstractmethod
 
 
+
+class TypedList:
+    def __init__(self):
+        self._items = []
+
+    def add(self, item) -> None:
+        self._items.append(item)
+
+    def get_items(self):
+        return self._items
+
+
 # Абстрактные классы для автомобилей и их частей
-class Engine(ABC):
-    @abstractmethod
+class Engine:
+    def __init__(self, cylinders, displacement):
+        self.cylinders = cylinders
+        self.displacement = displacement
+
     def get_type(self):
-        pass
+        return f"{self.__class__.__name__} with {self.cylinders} cylinders and {self.displacement}L displacement."
 
 
 class Wheel(ABC):
@@ -14,21 +29,22 @@ class Wheel(ABC):
         pass
 
 
-class Car(ABC):
-    @abstractmethod
+class Car:
+    def __init__(self, engine, wheel):
+        self.engine = engine
+        self.wheel = wheel
+
     def get_description(self):
-        pass
+        return f"{self.__class__.__name__} with {self.engine.get_type()} and {self.wheel.get_type()}."
 
 
 # Конкретные классы для двигателей
 class V8Engine(Engine):
-    def get_type(self):
-        return "V8 Engine"
+    pass
 
 
 class V6Engine(Engine):
-    def get_type(self):
-        return "V6 Engine"
+    pass
 
 
 # Конкретные классы для колес
@@ -44,27 +60,16 @@ class RegularWheel(Wheel):
 
 # Конкретные классы для автомобилей
 class SportsCar(Car):
-    def __init__(self, engine: Engine, wheel: Wheel):
-        self.engine = engine
-        self.wheel = wheel
-
-    def get_description(self):
-        return f"Sports Car with {self.engine.get_type()} and {self.wheel.get_type()}."
+    pass
 
 
 class RegularCar(Car):
-    def __init__(self, engine: Engine, wheel: Wheel):
-        self.engine = engine
-        self.wheel = wheel
-
-    def get_description(self):
-        return f"Regular Car with {self.engine.get_type()} and {self.wheel.get_type()} ."
-
+    pass
 
 # Абстрактные фабрики для компонентов
 class EngineFactory(ABC):
     @abstractmethod
-    def create_engine(self) -> Engine:
+    def create_engine(self):
         pass
 
 
@@ -77,12 +82,12 @@ class WheelFactory(ABC):
 # Конкретные фабрики для двигателей
 class SportsEngineFactory(EngineFactory):
     def create_engine(self) -> Engine:
-        return V8Engine()
+        return V8Engine(cylinders=8, displacement=2.5)
 
 
 class RegularEngineFactory(EngineFactory):
     def create_engine(self) -> Engine:
-        return V6Engine()
+        return V6Engine(cylinders=6, displacement=1.8)
 
 
 # Конкретные фабрики для колес
@@ -118,6 +123,14 @@ class RegularCarFactory(CarFactory):
 
 
 if __name__ == "__main__":
+    engine_list = TypedList()
+    engine_list.add(V8Engine(cylinders=8, displacement=2.5))
+    engine_list.add((V6Engine(cylinders=6, displacement=1.8)))
+
+    print('Engines in List:')
+    for engine in engine_list.get_items():
+        print(engine.get_type())
+
     sports_factory = SportsCarFactory()
     sports_car = sports_factory.create_car()
     print(sports_car.get_description())
