@@ -13,6 +13,7 @@ class Wheel(ABC):
     def get_type(self):
         pass
 
+
 class Car(ABC):
     @abstractmethod
     def get_description(self):
@@ -57,81 +58,72 @@ class RegularCar(Car):
         self.wheel = wheel
 
     def get_description(self):
-        return f"Regular Car with {self.engine.get_type()} and {self.wheel.get_type()} wheels."
+        return f"Regular Car with {self.engine.get_type()} and {self.wheel.get_type()} ."
 
 
-# Абстрактные фабрики для двигателя
+# Абстрактные фабрики для компонентов
 class EngineFactory(ABC):
     @abstractmethod
-    def create_v6_engine(self) -> Engine:
-        pass
-
-    @abstractmethod
-    def create_v8_engine(self) -> Engine:
+    def create_engine(self) -> Engine:
         pass
 
 
-# Абстрактные фабрики для колес
 class WheelFactory(ABC):
     @abstractmethod
-    def create_sports_wheel(self) -> Wheel:
-        pass
-
-    @abstractmethod
-    def create_regular_wheel(self) -> Wheel:
+    def create_wheel(self) -> Wheel:
         pass
 
 
 # Конкретные фабрики для двигателей
-class ConcreteEngineFactory(EngineFactory):
-    def create_v6_engine(self) -> Engine:
-        return V6Engine()
-
-    def create_v8_engine(self) -> Engine:
+class SportsEngineFactory(EngineFactory):
+    def create_engine(self) -> Engine:
         return V8Engine()
 
 
+class RegularEngineFactory(EngineFactory):
+    def create_engine(self) -> Engine:
+        return V6Engine()
+
+
 # Конкретные фабрики для колес
-class ConcreteWheelFactory(WheelFactory):
-    def create_sports_wheel(self) -> Wheel:
+class SportsWheelFactory(WheelFactory):
+    def create_wheel(self) -> Wheel:
         return SportsWheel()
 
-    def create_regular_wheel(self) -> Wheel:
+
+class RegularWheelFactory(WheelFactory):
+    def create_wheel(self) -> Wheel:
         return RegularWheel()
 
 
-# Фабрики автомобилей
+# Фабрика автомобилей, использующая фабрики компонентов
 class CarFactory(ABC):
     @abstractmethod
-    def create_car(self, engine_factory: EngineFactory, wheel_factory: WheelFactory) -> Car:
+    def create_car(self) -> Car:
         pass
 
 
 class SportsCarFactory(CarFactory):
-    def create_car(self, engine_factory: EngineFactory, wheel_factory: WheelFactory) -> Car:
-        engine = engine_factory.create_v8_engine()
-        wheel = wheel_factory.create_sports_wheel()
-        return SportsCar(engine, wheel)
+    def create_car(self) -> Car:
+        engine_factory = SportsEngineFactory()
+        wheel_factory = SportsWheelFactory()
+        return SportsCar(engine_factory.create_engine(), wheel_factory.create_wheel())
 
 
 class RegularCarFactory(CarFactory):
-    def create_car(self, engine_factory: EngineFactory, wheel_factory: WheelFactory) -> Car:
-        engine = engine_factory.create_v6_engine()
-        wheel = wheel_factory.create_regular_wheel()
-        return RegularCar(engine, wheel)
+    def create_car(self) -> Car:
+        engine_factory = RegularEngineFactory()
+        wheel_factory = RegularWheelFactory()
+        return RegularCar(engine_factory.create_engine(), wheel_factory.create_wheel())
 
 
 if __name__ == "__main__":
-
-    engine_factory = ConcreteEngineFactory()
-    wheel_factory = ConcreteWheelFactory()
-
-
     sports_factory = SportsCarFactory()
-    sports_car = sports_factory.create_car(engine_factory, wheel_factory)
+    sports_car = sports_factory.create_car()
     print(sports_car.get_description())
 
+    print('*' * 40)
 
     regular_factory = RegularCarFactory()
-    regular_car = regular_factory.create_car(engine_factory, wheel_factory)
+    regular_car = regular_factory.create_car()
     print(regular_car.get_description())
