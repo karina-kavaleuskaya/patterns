@@ -80,14 +80,14 @@ greeting_classes: Dict[Union[GreetingType, str], Greeter] = {
     GreetingType.NIGHT: NightGreeter(),
 }
 
-custom_greeting_classes = initialize_custom_greeters('configs')
-greeting_classes.update(custom_greeting_classes)
 
-def greet(name: str, greeting: Union[GreetingType, str]) -> str:
+def greet(name: str, greeting: Union[GreetingType, str],
+          greeting_classes: Dict[Union[GreetingType, str], Greeter]) -> str:
     greeter = greeting_classes.get(greeting)
 
     if greeter is None:
         raise ValueError("Invalid greeter type provided.")
+
     return greeter.greet(name)
 
 
@@ -110,12 +110,17 @@ def greet_two(name: str, greeting: GreetingType or str) -> str:
 
 
 if __name__ == "__main__":
+
+    custom_greeting_classes = initialize_custom_greeters('configs')
+    greeting_classes.update(custom_greeting_classes)
+
+
     start_time = time.time()
     with open('people.txt', 'r') as f:
         for line in f:
             gtype = random.choice(alpha) + random.choice(alpha)
             gtype_2 = random.choice(alpha) + random.choice(alpha)
-            print(greet(line, gtype), greet(line, gtype_2))
+            print(greet(line, gtype, greeting_classes), greet(line, gtype_2, greeting_classes))
 
     end_time = time.time()
     duration = end_time - start_time
